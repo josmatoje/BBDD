@@ -1,3 +1,4 @@
+Use master
 Create Database Colegas
 go
 Use Colegas
