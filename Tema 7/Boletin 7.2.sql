@@ -66,13 +66,16 @@ GO
 
 --6. Queremos saber los nombres y apellidos de todos los que tienen 30 años o más
 SELECT Nombre, Apellidos FROM People
-WHERE 30 <= YEAR (CURRENT_TIMESTAMP- CAST (FechaNac AS datetime))-1900
+--DEPRECATE WHERE 30 <= YEAR (CURRENT_TIMESTAMP- CAST (FechaNac AS datetime))-1900
+WHERE DATEADD (YEAR, -30, CURRENT_TIMESTAMP)<FechaNac 
+--A la fecha actual le restas 30 años y si es menor que la fecha de nacimiento de alguien significa que esta persona es mayor de 30 años
 GO
+SELECT CAST (FechaNac AS datetime) FROM People --DEPRECATE
+SELECT CAST (FechaNac AS smalldatetime) FROM People --DEPRECATE
 
 --7. Marca, año y modelo de todos los coches que no sean blancos ni verdes
 SELECT Marca, Anho, Modelo, Color FROM Carros
-	WHERE ((Color NOT LIKE '[Bb]lanco' ) AND
-			(Color NOT LIKE '[Vv]erde'))
+	WHERE Color NOT IN ('blanco','verde')
 GO
 select * from Carros
 
@@ -80,12 +83,22 @@ BEGIN TRANSACTION
 --8. El nuevo gobierno regional ha prohibido todas las religiones, excepto la oficial. Por ello, los pastafarianos se ven obligados a ocultarse. 
 --Inserta un nuevo libro titulado "Vidas santas" cuyo autor es el Abate Bringas. Actualiza la tabla lecturas para cambiar las lecturas del Evangelio 
 --del FSM por este nuevo libro
-
+INSERT INTO Libros VALUES (9, 'Vidas santas','Abate Bringas')
+UPDATE Libros SET Titulo ='Vidas santas',Autors='Abate Bringas'
+WHERE Titulo='Evangelio del Flying Spaguetti Monster'
+--select * from Libros
+COMMIT
 GO
 
 BEGIN TRANSACTION
 --9. Eloísa también ha leído El corazón de las tinieblas y le ha gustado mucho.
+INSERT INTO Lecturas (IDLibro, IDLector, AnhoLectura) VALUES
+	(2,4,YEAR(CURRENT_TIMESTAMP))
 
+--SELECT * FROM Libros
+--SELECT * FROM People
+--SELECT * FROM Lecturas
+COMMIT
 GO
 
 BEGIN TRANSACTION
