@@ -1,21 +1,21 @@
 USE Northwind
---1. Nombre del país y número de clientes de cada país, ordenados alfabéticamente por el nombre del país.
+--1. Nombre del paï¿½s y nï¿½mero de clientes de cada paï¿½s, ordenados alfabï¿½ticamente por el nombre del paï¿½s.
 
 SELECT Country, COUNT(*) AS [Numero de clientes] FROM Customers
 GROUP BY Country
 ORDER BY Country
 
---2. ID de producto y número de unidades vendidas de cada producto.
+--2. ID de producto y nï¿½mero de unidades vendidas de cada producto.
 select * from [Order Details]
 SELECT ProductID, SUM(Quantity) AS [Unidades vendidas]  FROM [Order Details]
 GROUP BY ProductID
 
---3. ID del cliente y número de pedidos que nos ha hecho.
+--3. ID del cliente y nï¿½mero de pedidos que nos ha hecho.
 
 SELECT CustomerID, COUNT(*) [Numero de pedidos] FROM Orders
 GROUP BY CustomerID
 
---4. ID del cliente, año y número de pedidos que nos ha hecho cada año.
+--4. ID del cliente, aï¿½o y nï¿½mero de pedidos que nos ha hecho cada aï¿½o.
 
 SELECT CustomerID, YEAR(OrderDate), COUNT(*) [Numero de pedidos] FROM Orders
 GROUP BY CustomerID, YEAR(OrderDate)
@@ -25,21 +25,31 @@ GROUP BY CustomerID, YEAR(OrderDate)
 
 SELECT ProductID, SUM(Quantity*UnitPrice*(1-Discount)) AS [Total facturado] FROM [Order Details]
 GROUP BY ProductID
+ORDER BY [Cantidad facturada]
 SELECT * FROM [Order Details]
 
 --6. ID del proveedor e importe total del stock acumulado de productos correspondientes a ese proveedor.
-SELECT * FROM Products
---7. Número de pedidos registrados mes a mes de cada año.
 
---8. Año y tiempo medio transcurrido entre la fecha de cada pedido (OrderDate) y la fecha en la que lo hemos enviado (ShipDate), en días 
---para cada año.
+SELECT SupplierID, SUM(UnitPrice*UnitsInStock) AS [Importe Total] FROM Products 
+GROUP BY SupplierID
 
-SELECT YEAR(OrderDate) AS Año, AVG(DATEDIFF(DAY, OrderDate, ShippedDate)) AS [Dias de media] FROM Orders
+--7. Nï¿½mero de pedidos registrados mes a mes de cada aï¿½o.
+
+SELECT YEAR(OrderDate) AS Aï¿½o, COUNT(OrderDate) AS [Numero de pedidos] FROM Orders
 GROUP BY YEAR(OrderDate)
 
---9. ID del distribuidor y número de pedidos enviados a través de ese distribuidor.
+--8. Aï¿½o y tiempo medio transcurrido entre la fecha de cada pedido (OrderDate) y la fecha en la que lo hemos enviado (ShipDate), en dï¿½as 
+--para cada aï¿½o.
 
---10. ID de cada proveedor y número de productos distintos que nos suministra.
-SELECT SupplierID, COUNT(DISTINCT ProductID) AS [Nº productos] FROM Products
+SELECT YEAR(OrderDate) AS Aï¿½o, AVG(DATEDIFF(DAY, OrderDate, ShippedDate)) AS [Dias de media] FROM Orders
+GROUP BY YEAR(OrderDate)
+
+--9. ID del distribuidor y nï¿½mero de pedidos enviados a travï¿½s de ese distribuidor.
+
+SELECT ShipVia, COUNT(*) AS [Numero de pedidos] FROM Orders
+GROUP BY ShipVia
+
+--10. ID de cada proveedor y nï¿½mero de productos distintos que nos suministra.
+SELECT SupplierID, COUNT(DISTINCT ProductID) AS [Nï¿½ productos] FROM Products
 GROUP BY SupplierID
 
