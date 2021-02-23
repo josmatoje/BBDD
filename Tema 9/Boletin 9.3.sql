@@ -1,6 +1,6 @@
 USE pubs
 
---1. Título y tipo de todos los libros en los que alguno de los autores vive en California (CA).
+--1. Tï¿½tulo y tipo de todos los libros en los que alguno de los autores vive en California (CA).
 
 SELECT DISTINCT T.title,T.type FROM titles AS T
 	INNER JOIN titleauthor AS TA ON T.title_id=TA.title_id
@@ -8,7 +8,7 @@ SELECT DISTINCT T.title,T.type FROM titles AS T
 	WHERE A.state = 'CA'
 	ORDER BY T.title
 
---2. Título y tipo de todos los libros en los que ninguno de los autores vive en California (CA).
+--2. Tï¿½tulo y tipo de todos los libros en los que ninguno de los autores vive en California (CA).
 
 SELECT DISTINCT T.title,T.type FROM titles AS T
 	LEFT JOIN titleauthor AS TA ON T.title_id=TA.title_id
@@ -20,10 +20,10 @@ SELECT DISTINCT T.title,T.type FROM titles AS T
 	SELECT * FROM titles
 	ORDER BY title
 
---3. Número de libros en los que ha participado cada autor, incluidos los que no han publicado nada.
+--3. Nï¿½mero de libros en los que ha participado cada autor, incluidos los que no han publicado nada.
 
-SELECT A.au_fname, A.au_lname, COUNT(T.title) AS [Nº de libros] FROM titles AS T
-	RIGHT JOIN titleauthor AS TA ON T.title_id=TA.title_id
+SELECT A.au_fname, A.au_lname, COUNT(T.title) AS [Nï¿½ de libros] FROM titles AS T
+	INNER JOIN titleauthor AS TA ON T.title_id=TA.title_id
 	RIGHT JOIN authors AS A ON TA.au_id=A.au_id
 	GROUP BY A.au_id, A.au_fname, A.au_lname
 
@@ -33,44 +33,54 @@ SELECT A.au_fname, A.au_lname, COUNT(T.title) AS [Nº de libros] FROM titles AS T
 	INSERT INTO authors(au_id,au_lname,au_fname,phone,contract) VALUES ('111-11-1119', 'MATA', 'JOSEMA', '237482246794',0)
 	ROLLBACK
 
---4. Número de libros que ha publicado cada editorial, incluidas las que no han publicado ninguno.
+--4. Nï¿½mero de libros que ha publicado cada editorial, incluidas las que no han publicado ninguno.
 
-SELECT P.pub_name, COUNT(T.title_id) AS [Nº de libros] FROM publishers AS P
+SELECT P.pub_name, COUNT(T.title_id) AS [Nï¿½ de libros] FROM publishers AS P
 	LEFT JOIN titles AS T ON P.pub_id=T.pub_id
 	GROUP BY P.pub_id, P.pub_name
 
 	--Comprobaciones
 	SELECT * FROM publishers
 
---5. Número de empleados de cada editorial.
+--5. Nï¿½mero de empleados de cada editorial.
 
-SELECT P.pub_name, COUNT(E.emp_id) AS [Nº de empleado] FROM publishers AS P
+SELECT P.pub_name, COUNT(E.emp_id) AS [Nï¿½ de empleado] FROM publishers AS P
 	LEFT JOIN employee AS E ON P.pub_id=E.pub_id
 	GROUP BY P.pub_id, P.pub_name
 
 	--Comprobaciones
 	SELECT * FROM employee
 
---6. Calcular la relación entre número de ejemplares publicados y número de empleados de cada editorial, incluyendo el nombre de la misma.
+--6. Calcular la relaciï¿½n entre nï¿½mero de ejemplares publicados y nï¿½mero de empleados de cada editorial, incluyendo el nombre de la misma.
 
-SELECT P.pub_name, COUNT(DISTINCT T.title_id) AS [Nº de libros], COUNT(DISTINCT E.emp_id) AS [Nº de empleado] FROM titles AS T
-	RIGHT JOIN publishers AS P ON T.pub_id=P.pub_id
-	LEFT JOIN employee AS E ON P.pub_id=E.pub_id
-	GROUP BY P.pub_id, P.pub_name
+SELECT * , C.[Nï¿½ de libros]/C.[Nï¿½ de empleado] AS [Relacion de Sech] FROM 
+	(SELECT P.pub_name, COUNT(DISTINCT T.title_id) AS [Nï¿½ de libros], COUNT(DISTINCT E.emp_id) AS [Nï¿½ de empleado] FROM titles AS T
+		RIGHT JOIN publishers AS P ON T.pub_id=P.pub_id
+		LEFT JOIN employee AS E ON P.pub_id=E.pub_id
+		GROUP BY P.pub_id, P.pub_name) AS C
 
 --SUBCONSULTAS
 
-SELECT CL.pub_name, CL.[Nº de libros], CE.[Nº de empleado] FROM (
-				(SELECT P.pub_name, COUNT(T.title_id) AS [Nº de libros] FROM publishers AS P
+SELECT CL.pub_name, CL.[Nï¿½ de libros], CE.[Nï¿½ de empleado] FROM (
+				(SELECT P.pub_name, COUNT(T.title_id) AS [Nï¿½ de libros] FROM publishers AS P
 					LEFT JOIN titles AS T ON P.pub_id=T.pub_id
 					GROUP BY P.pub_id, P.pub_name) AS CL
 				INNER JOIN
-				(SELECT P.pub_name, COUNT(E.emp_id) AS [Nº de empleado] FROM publishers AS P
+				(SELECT P.pub_name, COUNT(E.emp_id) AS [Nï¿½ de empleado] FROM publishers AS P
 					LEFT JOIN employee AS E ON P.pub_id=E.pub_id
 					GROUP BY P.pub_id, P.pub_name) AS CE
 				ON CL.pub_name=CE.pub_name)
+				
+--SUBCONSULTA DE COLUMNA CALCULADA
 
---7. Nombre, Apellidos y ciudad de todos los autores que han trabajado para la editorial "Binnet & Hardley” o "Five Lakes Publishing”
+SELECT * , CAST(C.[Nï¿½ de libros] AS FLOAT)/NULLIF (C.[Nï¿½ de empleado],0) AS [Relacion de Sech] FROM 
+	(SELECT P.pub_name, COUNT(DISTINCT T.title_id) AS [Nï¿½ de libros], COUNT(DISTINCT E.emp_id) AS [Nï¿½ de empleado] FROM titles AS T
+		RIGHT JOIN publishers AS P ON T.pub_id=P.pub_id
+		LEFT JOIN employee AS E ON P.pub_id=E.pub_id
+		GROUP BY P.pub_id, P.pub_name) AS C
+
+
+--7. Nombre, Apellidos y ciudad de todos los autores que han trabajado para la editorial "Binnet & Hardleyï¿½ o "Five Lakes Publishingï¿½
 
 SELECT A.au_fname, A.au_lname, A.city FROM publishers AS P
 	INNER JOIN titles AS T ON P.pub_id=T.pub_id
@@ -79,7 +89,7 @@ SELECT A.au_fname, A.au_lname, A.city FROM publishers AS P
 	WHERE P.pub_name = 'Binnet & Hardley' OR 
 			P.pub_name = 'Five Lakes Publishing'
 
---8. Empleados que hayan trabajado en alguna editorial que haya publicado algún libro en el que alguno de los autores fuera Marjorie Green 
+--8. Empleados que hayan trabajado en alguna editorial que haya publicado algï¿½n libro en el que alguno de los autores fuera Marjorie Green 
 --o Michael O'Leary.
 
 SELECT DISTINCT E.* FROM employee AS E
@@ -89,15 +99,15 @@ SELECT DISTINCT E.* FROM employee AS E
 	WHERE (A.au_fname= 'Marjorie' AND A.au_lname = 'Green') OR
 			(A.au_fname= 'Michael' AND A.au_lname = 'O''Leary')
 
---9. Número de ejemplares vendidos de cada libro, especificando el título y el tipo.
+--9. Nï¿½mero de ejemplares vendidos de cada libro, especificando el tï¿½tulo y el tipo.
 
-SELECT T.title, T.type, COUNT(t.title_id) AS [Nº DE LIBROS] FROM titles AS T
+SELECT T.title, T.type, COUNT(t.title_id) AS [Nï¿½ DE LIBROS] FROM titles AS T
 	LEFT JOIN sales AS S ON T.title_id = S.title_id
 	GROUP BY T.title_id, T.title, T.type
 
---10. Número de ejemplares de todos sus libros que ha vendido cada autor.
+--10. Nï¿½mero de ejemplares de todos sus libros que ha vendido cada autor.
 
-SELECT A.au_fname, A.au_lname, COUNT(T.title_id) AS [Nº DE LIBROS] FROM authors AS A
+SELECT A.au_fname, A.au_lname, COUNT(T.title_id) AS [Nï¿½ DE LIBROS] FROM authors AS A
 	LEFT JOIN titleauthor AS TA ON A.au_id=TA.au_id
 	LEFT JOIN titles AS T ON TA.title_id=T.title_id
 	LEFT JOIN sales AS S ON T.title_id = S.title_id
@@ -105,25 +115,26 @@ SELECT A.au_fname, A.au_lname, COUNT(T.title_id) AS [Nº DE LIBROS] FROM authors 
 --Comprobaciones	
 SELECT * FROM authors
 
---11. Número de empleados de cada categoría (jobs).
+--11. Nï¿½mero de empleados de cada categorï¿½a (jobs).
 
-SELECT J.job_desc, COUNT(E.emp_id) [Nº de Empleados] FROM jobs AS J
+SELECT J.job_desc, COUNT(E.emp_id) [Nï¿½ de Empleados] FROM jobs AS J
 	LEFT JOIN employee AS E ON J.job_id=E.job_id
 	GROUP BY J.job_id,J.job_desc
 --Comprobacion
 SELECT * FROM jobs
 
---12. Número de empleados de cada categoría (jobs) que tiene cada editorial, incluyendo aquellas categorías en las que no haya ningún 
+--12. Nï¿½mero de empleados de cada categorï¿½a (jobs) que tiene cada editorial, incluyendo aquellas categorï¿½as en las que no haya ningï¿½n 
 --empleado.
 
-SELECT P.pub_name, J.job_desc, COUNT (E.emp_id) AS [Nº de empleados] FROM publishers AS P
+SELECT P.pub_name, J.job_desc, COUNT (E.emp_id) AS [Nï¿½ de empleados] FROM publishers AS P
 	RIGHT JOIN employee AS E ON P.pub_id=E.pub_id
 	CROSS JOIN jobs AS J 
 	GROUP BY  J.job_id, J.job_desc, P.pub_id, P.pub_name
 
---13. Autores que han escrito libros de dos o más tipos diferentes
+--13. Autores que han escrito libros de dos o mï¿½s tipos diferentes
 
 
 
---14. Empleados que no trabajan actualmente en editoriales que han publicado libros cuya columna notes contenga la palabra "and”
+--14. Empleados que no trabajan actualmente en editoriales que han publicado libros cuya columna notes contenga la palabra "andï¿½
 
+SELECT * FROM titles
