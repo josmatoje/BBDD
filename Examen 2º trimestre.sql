@@ -41,6 +41,7 @@ GO
 		--SELECT * FROM ActosProtesta AS A
 		--INNER JOIN GruposProtestas AS GP ON A.ID=GP.IDActo
 
+GO
 --Ejercicio 2 (2 points)
 
 --Queremos saber en qué Actos se han producido incidentes en los que no han intervenido materiales de la categoría 
@@ -68,6 +69,7 @@ SELECT DISTINCT AP.* FROM ActosProtesta AS AP
 		INNER JOIN Categorias AS C ON M.Categoria=C.ID
 		WHERE C.Nombre ='Arrojadizas' OR C.Nombre ='Armas blancas')
 
+GO
 --Ejercicio 3 (2 points)
 
 --Queremos saber cuál fue el acto en el que más detenciones se han producido en cada ciudad y cuántos de los detenidos en 
@@ -103,6 +105,7 @@ SELECT VD.ID, VD.Titulo, VD.[Nº de detenidos], ISNULL(VMD.[Nº de menores detenid
 													 VD.Ciudad=MAXD.Ciudad
 
 
+GO
 --Ejercicio 4 (2 points)
 
 --Queremos saber cuál es la hora más peligrosa en cada ciudad. Consideramos que la más peligrosa es cuando se producen un 
@@ -132,6 +135,7 @@ SELECT DHC.Ciudad, DHC.Hora FROM V_DetencionesHoraCiudad AS DHC
 ORDER BY Ciudad --Aparecen varias veces ciudades porque tienen varias horas peligrosas (igual numero de detenciones)
 
 
+GO
 --Ejercicio 5 (2 points)
 
 --El grupo “Club de fans de El Fari” ha decidido nombrar socios a todos los activistas que hayan sido detenidos en algún 
