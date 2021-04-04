@@ -1,7 +1,7 @@
 USE LeoChampionsLeague
 GO
 
---CREACIÓN DE VISTAS NECESARIAS
+--CREACIï¿½N DE VISTAS NECESARIAS
 --------------------------------------------------------------
 CREATE OR ALTER VIEW V_Numero_Partidos_Jugados AS
 	SELECT ELocal AS Equipo, NPartidosLocal + NPartidosVisitante AS NPartidosJugados FROM
@@ -61,7 +61,7 @@ GO
 
 --INSERCION DE DATOS
 -------------------------------------------------------
-
+TRUNCATE TABLE Clasificacion
 --Insercion del id y los nombres de los equipos
 BEGIN TRAN
 
@@ -69,7 +69,7 @@ INSERT INTO Clasificacion (IDEquipo, NombreEquipo)
 	SELECT ID, Nombre FROM Equipos
 GO
 
---Inserción de resto de datos
+--Inserciï¿½n de resto de datos
 UPDATE Clasificacion
 	SET PartidosJugados = NPartidosJugados,
 		PartidosGanados = [Partidos Ganados], 
@@ -85,7 +85,7 @@ UPDATE Clasificacion
 
 GO
 
---Inserción individual de partidos ganados y empatados (DEPRECATED)
+--Inserciï¿½n individual de partidos ganados y empatados (DEPRECATED)
 
 --BEGIN TRAN
 --UPDATE Clasificacion
@@ -99,6 +99,6 @@ GO
 
 --GO
 
---Consulta de la cladsificación ordenada
+--Consulta de la cladsificaciï¿½n ordenada
 SELECT * FROM Clasificacion
 ORDER BY Puntos DESC, (GolesFavor-GolesContra) DESC, GolesFavor DESC
