@@ -1,29 +1,33 @@
+--Proyecto de Angel Lopez y Jose Maria Mata
+
 USE LeoChampionsLeague
 GO
 
---CREACI�N DE VISTAS NECESARIAS
+--CREACION DE VISTAS NECESARIAS
 --------------------------------------------------------------
-CREATE OR ALTER VIEW V_Numero_Partidos_Jugados AS
-	SELECT ELocal AS Equipo, NPartidosLocal + NPartidosVisitante AS NPartidosJugados FROM
-		(SELECT ELocal, COUNT(*) AS NPartidosLocal FROM Partidos
+--CREATE --OR 
+ALTER 
+VIEW V_Numero_Partidos_Jugados AS
+SELECT ELocal AS Equipo, ISNULL(NPartidosLocal,0) + ISNULL(NPartidosVisitante,0) AS NPartidosJugados FROM
+	(SELECT ELocal, COUNT(*) AS NPartidosLocal FROM Partidos
 		WHERE Finalizado = 1
 		GROUP BY ELocal) AS PL 
-		INNER JOIN
-
-		(SELECT EVisitante, COUNT(*) AS NPartidosVisitante FROM Partidos
+	FULL JOIN
+	(SELECT EVisitante, COUNT(*) AS NPartidosVisitante FROM Partidos
 		WHERE Finalizado = 1
 		GROUP BY EVisitante) AS PV ON PL.ELocal = PV.EVisitante
 GO
 
 --SELECT * FROM V_Numero_Partidos_Jugados
 
-CREATE OR ALTER VIEW V_Partidos_Ganados AS
-SELECT ELocal AS Equipo,[Partidos Locales Ganados] + [Partidos Visitantes Ganados] AS [Partidos Ganados] FROM
+--CREATE --OR 
+ALTER 
+VIEW V_Partidos_Ganados AS
+SELECT ELocal AS Equipo,ISNULL([Partidos Locales Ganados],0) + ISNULL([Partidos Visitantes Ganados],0) AS [Partidos Ganados] FROM
 	(SELECT ELocal, COUNT(*) AS [Partidos Locales Ganados] FROM Partidos 
 		WHERE GolesLocal > GolesVisitante AND Finalizado = 1
 		GROUP BY ELocal) AS L
-		INNER JOIN
-	
+	FULL JOIN
 	(SELECT EVisitante, COUNT(*) AS [Partidos Visitantes Ganados] FROM Partidos 
 		WHERE GolesLocal < GolesVisitante AND Finalizado = 1
 		GROUP BY EVisitante) AS V ON L.ELocal = V.EVisitante
@@ -31,13 +35,14 @@ GO
 
 --SELECT * FROM V_Partidos_Ganados
 
-CREATE OR ALTER VIEW V_Partidos_Empatados AS
-SELECT ELocal AS Equipo,[Partidos Locales Empatados] + [Partidos Visitantes Empatados] AS [Partidos Empatados] FROM
+--CREATE --OR
+ ALTER 
+VIEW V_Partidos_Empatados AS
+SELECT ELocal AS Equipo,ISNULL([Partidos Locales Empatados],0) + ISNULL([Partidos Visitantes Empatados],0) AS [Partidos Empatados] FROM
 	(SELECT ELocal, COUNT(*) AS [Partidos Locales Empatados] FROM Partidos 
 		WHERE GolesLocal = GolesVisitante AND Finalizado = 1
 		GROUP BY ELocal) AS L
-		INNER JOIN
-	
+	FULL JOIN
 	(SELECT EVisitante, COUNT(*) AS [Partidos Visitantes Empatados] FROM Partidos 
 		WHERE GolesLocal = GolesVisitante AND Finalizado = 1
 		GROUP BY EVisitante) AS V ON L.ELocal = V.EVisitante
@@ -45,12 +50,14 @@ GO
 
 --SELECT * FROM V_Partidos_Empatados
 
-CREATE OR ALTER VIEW V_Goles_Favor_Contra AS
-SELECT ELocal AS Equipo, GolesFavorLocal + GolesFavorVisitante AS [Goles Favor], GolesContraLocal + GolesContraVisitante AS [Goles Contra] FROM
+--CREATE --OR 
+ALTER 
+VIEW V_Goles_Favor_Contra AS
+SELECT ELocal AS Equipo, ISNULL(GolesFavorLocal,0) + ISNULL(GolesFavorVisitante,0) AS [Goles Favor], ISNULL(GolesContraLocal,0) + ISNULL(GolesContraVisitante,0) AS [Goles Contra] FROM
 	(SELECT ELocal, SUM(GolesLocal) AS GolesFavorLocal, SUM(GolesVisitante) AS GolesContraLocal FROM Partidos
 		WHERE Finalizado = 1
 		GROUP BY ELocal) AS GL
-		INNER JOIN
+	FULL JOIN
 	(SELECT EVisitante, SUM(GolesVisitante) AS GolesFavorVisitante, SUM(GolesLocal) AS GolesContraVisitante FROM Partidos
 		WHERE Finalizado = 1
 		GROUP BY EVisitante) AS GV ON GL.ELocal = GV.EVisitante
@@ -69,7 +76,7 @@ INSERT INTO Clasificacion (IDEquipo, NombreEquipo)
 	SELECT ID, Nombre FROM Equipos
 GO
 
---Inserci�n de resto de datos
+--Insercion de resto de datos
 UPDATE Clasificacion
 	SET PartidosJugados = NPartidosJugados,
 		PartidosGanados = [Partidos Ganados], 
@@ -81,7 +88,7 @@ UPDATE Clasificacion
 			INNER JOIN V_Goles_Favor_Contra AS VGFC ON VPE.Equipo=VGFC.Equipo
 	WHERE VPJ.Equipo = IDEquipo
 	--rollback
-	commit
+	COMMIT
 
 GO
 
@@ -102,3 +109,5 @@ GO
 --Consulta de la cladsificaci�n ordenada
 SELECT * FROM Clasificacion
 ORDER BY Puntos DESC, (GolesFavor-GolesContra) DESC, GolesFavor DESC
+
+SELECT * FROM Partidos WHERE EVisitante = 'BARC'-- OR EVisitante='BARC'
