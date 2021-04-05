@@ -1,6 +1,6 @@
 ﻿-- Resultados de una liga deportiva
 -- Autor: Leo
--- 19/03/2020 Quinto día de confinamiento
+-- 19/03/2020 Quinto d�a de confinamiento
 Use master
 GO
 Create Database LeoChampionsLeague
@@ -29,7 +29,6 @@ Create Table Partidos (
 )
 GO
 Create Table Clasificacion(
-	Posicion TinyInt Not NULL,
 	IDEquipo Char(4) Not NULL,
 	NombreEquipo VarChar(20) Not NULL,
 	PartidosJugados TinyInt Not NULL Default 0,
@@ -39,17 +38,17 @@ Create Table Clasificacion(
 	Puntos AS PartidosGanados * 3 + PartidosEmpatados,
 	GolesFavor SmallInt Not NULL Default 0,
 	GolesContra SmallInt Not NULL Default 0,
-	Constraint PKClasificacion Primary Key (Posicion),
+	Constraint PKClasificacion Primary Key (IDEquipo),
 	Constraint FKClasificacionEquipo Foreign Key (IDEquipo) REFERENCES Equipos (ID)
 )
 -- Equipos participantes 
 INSERT INTO Equipos (ID,Nombre,Ciudad,Pais)
-     VALUES ('RBET','Real Betis','Sevilla','España'),('LIVL','Liverpool FC','Liverpool','Reino Unido'),('ESRO','Estrella Roja','Belgrado','Serbia'),
+     VALUES ('RBET','Real Betis','Sevilla','Espa�a'),('LIVL','Liverpool FC','Liverpool','Reino Unido'),('ESRO','Estrella Roja','Belgrado','Serbia'),
 	 ('AJAX','Ajax','Amsterdam','Holanda'),('MANC','Manchester City','Manchester','Reino Unido'),('ARAR','Ararat','Erevan','Armenia'),
-	 ('BODO','Borussia Dortmund','Dortmund','Alemania'),('BARC','FC Barcelona','Barcelona','España'),('PASG','Paris Saint Germain','Paris','Francia'),
+	 ('BODO','Borussia Dortmund','Dortmund','Alemania'),('BARC','FC Barcelona','Barcelona','Espa�a'),('PASG','Paris Saint Germain','Paris','Francia'),
 	 ('OLYM','Olympiacos','Atenas','Grecia'),('MANU','Manchester United','Manchester','Reino Unido'),('OLYL','Olympique de Lion','Lion','Francia'),
 	 ('INTM','Inter','Milan','Italia'),('BENF','Benfica','Lisboa','Portugal'),('BAYM','Bayern','Munich','Alemania'),('JUVT','Juventus','Turin','Italia'),
-	 ('ZENR','Zenit','San Petesburgo','Rusia'), ('RMAD','Real Madrid','Madrid','España')
+	 ('ZENR','Zenit','San Petesburgo','Rusia'), ('RMAD','Real Madrid','Madrid','Espa�a')
 GO
 
 -- Poblamos la tabla Partidos
