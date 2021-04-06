@@ -5,8 +5,7 @@ GO
 
 --CREACION DE VISTAS NECESARIAS
 --------------------------------------------------------------
---CREATE --OR 
-ALTER 
+CREATE OR ALTER 
 VIEW V_Numero_Partidos_Jugados AS
 SELECT ELocal AS Equipo, ISNULL(NPartidosLocal,0) + ISNULL(NPartidosVisitante,0) AS NPartidosJugados FROM
 	(SELECT ELocal, COUNT(*) AS NPartidosLocal FROM Partidos
@@ -20,8 +19,7 @@ GO
 
 --SELECT * FROM V_Numero_Partidos_Jugados
 
---CREATE --OR 
-ALTER 
+CREATE OR ALTER 
 VIEW V_Partidos_Ganados AS
 SELECT ELocal AS Equipo,ISNULL([Partidos Locales Ganados],0) + ISNULL([Partidos Visitantes Ganados],0) AS [Partidos Ganados] FROM
 	(SELECT ELocal, COUNT(*) AS [Partidos Locales Ganados] FROM Partidos 
@@ -35,8 +33,7 @@ GO
 
 --SELECT * FROM V_Partidos_Ganados
 
---CREATE --OR
- ALTER 
+CREATE OR ALTER 
 VIEW V_Partidos_Empatados AS
 SELECT ELocal AS Equipo,ISNULL([Partidos Locales Empatados],0) + ISNULL([Partidos Visitantes Empatados],0) AS [Partidos Empatados] FROM
 	(SELECT ELocal, COUNT(*) AS [Partidos Locales Empatados] FROM Partidos 
@@ -50,8 +47,7 @@ GO
 
 --SELECT * FROM V_Partidos_Empatados
 
---CREATE --OR 
-ALTER 
+CREATE OR ALTER 
 VIEW V_Goles_Favor_Contra AS
 SELECT ELocal AS Equipo, ISNULL(GolesFavorLocal,0) + ISNULL(GolesFavorVisitante,0) AS [Goles Favor], ISNULL(GolesContraLocal,0) + ISNULL(GolesContraVisitante,0) AS [Goles Contra] FROM
 	(SELECT ELocal, SUM(GolesLocal) AS GolesFavorLocal, SUM(GolesVisitante) AS GolesContraLocal FROM Partidos
@@ -76,7 +72,7 @@ INSERT INTO Clasificacion (IDEquipo, NombreEquipo)
 	SELECT ID, Nombre FROM Equipos
 GO
 
---Insercion de resto de datos
+--Actualizacion de los datos de la clasificacion
 UPDATE Clasificacion
 	SET PartidosJugados = NPartidosJugados,
 		PartidosGanados = [Partidos Ganados], 
@@ -92,7 +88,7 @@ UPDATE Clasificacion
 
 GO
 
---Inserci�n individual de partidos ganados y empatados (DEPRECATED)
+--Insercion individual de partidos ganados y empatados (DEPRECATED)
 
 --BEGIN TRAN
 --UPDATE Clasificacion
@@ -106,8 +102,8 @@ GO
 
 --GO
 
---Consulta de la cladsificaci�n ordenada
+---------------------------------------------------
+--Consulta de la clasificacion ordenada
 SELECT * FROM Clasificacion
 ORDER BY Puntos DESC, (GolesFavor-GolesContra) DESC, GolesFavor DESC
 
-SELECT * FROM Partidos WHERE EVisitante = 'BARC'-- OR EVisitante='BARC'
