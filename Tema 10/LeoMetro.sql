@@ -32,6 +32,31 @@ SELECT * FROM  LM_Itinerarios AS IIN
 --Calcula el dinero gastado por cada usuario en el mes de febrero de 2017. El precio de un viaje es el de la zona más cara que incluya. Incluye a 
 --los que no han viajado.
 
+SELECT P.ID, P.Nombre, P.Apellidos, SUM(V.Importe_Viaje) AS [Dinero gastado en Febrero 2017] FROM LM_Pasajeros AS P
+	LEFT JOIN LM_Tarjetas AS T ON P.ID=T.IDPasajero
+	INNER JOIN LM_Viajes AS V ON T.ID=V.IDTarjeta
+	--WHERE V.MomentoEntrada BETWEEN SMALLDATETIMEFROMPARTS(2017,2,1,0,0) AND SMALLDATETIMEFROMPARTS(2017,2,28,23,59)
+	WHERE YEAR(V.MomentoSalida)=2017 AND MONTH(V.MomentoSalida)=2
+	GROUP BY P.ID, P.Nombre, P.Apellidos
+	ORDER BY [Dinero gastado en Febrero 2017]
+	
+
 --Ejercicio 9
 --Calcula el tiempo medio diario que cada pasajero pasa en el sistema de metro y el número de veces que accede al mismo.
+GO
+CREATE OR ALTER VIEW V_MinutosCambioDia AS(
+	SELECT *, 
+			DATEDIFF(MINUTE,MomentoEntrada,SMALLDATETIMEFROMPARTS(YEAR(MomentoSalida),MONTH(MomentoSalida), DAY(MomentoSalida),0,0)) AS [Minutos hasta cambio de dia], 
+			DATEDIFF(MINUTE,SMALLDATETIMEFROMPARTS(YEAR(MomentoSalida),MONTH(MomentoSalida), DAY(MomentoSalida),0,0),MomentoSalida) AS [Minutos desde cambio de dia] 
+					FROM LM_Viajes
+	WHERE DAY(MomentoEntrada)!=DAY(MomentoSalida))  --Asumo que nadie está más de un dia en el metro
+GO
 
+
+	SELECT * FROM V_MinutosCambioDia
+	UNION
+	(SELECT *, DATEDIFF(MINUTE, MomentoEntrada,MomentoSalida) AS [Minutos hasta cambio de dia], NULL  AS [Minutos desde cambio de dia]  FROM LM_Viajes
+	WHERE DAY(MomentoEntrada)=DAY(MomentoSalida))
+
+
+GO
