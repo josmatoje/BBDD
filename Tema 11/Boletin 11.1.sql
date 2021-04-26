@@ -6,11 +6,35 @@ USE Northwind
 --insertarlo.
 
 GO
-CREATE OR ALTER PROCEDURE InsertaActualizaCruzcampo AS 
-BEGIN
-	
-END
+CREATE OR ALTER PROCEDURE InsertaActualizaCruzcampo 
+			@NombreProducto nvarchar(40),
+			@Proveedor int,
+			@Categoria int,
+			@Cantidad nvarchar(20),
+			@Precio money,
+			@Unidades smallint,
+			@UnidadesPedidas smallint,
+			@NivelDeCosa smallint,
+			@Discounted bit
+AS 
+	BEGIN
+		IF (EXISTS (SELECT * FROM Products WHERE ProductName='Cruzcampo lata'))
+			BEGIN
+				UPDATE Products SET UnitPrice = @Precio,
+									SupplierID = @Proveedor,
+									CategoryID = @Categoria,
+									QuantityPerUnit = @Cantidad,
+									Discontinued = @Discounted
+						WHERE ProductName='Cruzcampo lata'
+			END --IF
+		ELSE
+			BEGIN
+				INSERT INTO Products (ProductName, UnitPrice, SupplierID, CategoryID, QuantityPerUnit, Discontinued)
+					VALUES(@NombreProducto, @Precio, @Proveedor, @Categoria, @Cantidad, @Discounted)
+			END --ELSE
+	END
 GO
+
 
 --2. Comprueba si existe una tabla llamada ProductSales. Esta tabla ha de tener de cada producto el ID, el Nombre, el Precio unitario, el número 
 --total de unidades vendidas y el total de dinero facturado con ese producto. Si no existe, créala
@@ -31,3 +55,33 @@ GO
 --		Entre 10% y 50%						+5%
 --		Mayor del 50%						10% con un máximo de 2,25
 
+GO
+
+CREATE OR ALTER FUNCTION CambioPrecio (@IdProducto INT) RETURNS MONEY
+BEGIN
+	DECLARE @PrecioIncrementado MONEY
+	SELECT * FROM Products AS P
+		INNER JOIN 
+
+	RETURN @PrecioIncrementado
+END
+
+
+GO
+CREATE OR ALTER FUNCTION IncrementoAnual (@AnhoFinal INT) RETURNS TABLE 
+AS RETURN(
+	SELECT A1.ProductID, CAST ((A2.[Cantidad vendida]-A1.[Cantidad vendida]) AS float)/A2.[Cantidad vendida] AS Diferencia FROM VentasAnuales(@AnhoFinal-1) AS A1
+		INNER JOIN VentasAnuales(@AnhoFinal) AS A2 ON A1.ProductID=A2.ProductID
+	)
+GO
+
+CREATE OR ALTER FUNCTION VentasAnuales (@Anho INT) RETURNS TABLE
+AS RETURN(
+	SELECT OD.ProductID, SUM(OD.Quantity) AS [Cantidad vendida] FROM [Order Details] AS OD
+		INNER JOIN Orders AS O ON OD.OrderID=O.OrderID
+		WHERE YEAR(O.OrderDate) = @Anho
+		GROUP BY OD.ProductID, YEAR(O.OrderDate)
+)
+GO
+
+SELECT * FROM IncrementoAnual(1997)
