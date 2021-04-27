@@ -57,24 +57,7 @@ GO
 
 GO
 
-CREATE OR ALTER FUNCTION CambioPrecio (@IdProducto INT) RETURNS MONEY
-BEGIN
-	DECLARE @PrecioIncrementado MONEY
-	SELECT * FROM Products AS P
-		INNER JOIN 
-
-	RETURN @PrecioIncrementado
-END
-
-
-GO
-CREATE OR ALTER FUNCTION IncrementoAnual (@AnhoFinal INT) RETURNS TABLE 
-AS RETURN(
-	SELECT A1.ProductID, CAST ((A2.[Cantidad vendida]-A1.[Cantidad vendida]) AS float)/A2.[Cantidad vendida] AS Diferencia FROM VentasAnuales(@AnhoFinal-1) AS A1
-		INNER JOIN VentasAnuales(@AnhoFinal) AS A2 ON A1.ProductID=A2.ProductID
-	)
-GO
-
+--Devuelve las ventas realizadas en un año dado por parametro
 CREATE OR ALTER FUNCTION VentasAnuales (@Anho INT) RETURNS TABLE
 AS RETURN(
 	SELECT OD.ProductID, SUM(OD.Quantity) AS [Cantidad vendida] FROM [Order Details] AS OD
@@ -84,4 +67,43 @@ AS RETURN(
 )
 GO
 
-SELECT * FROM IncrementoAnual(1997)
+--Devuelve el incremento porcentual de todos los productos en un año dado respecto al anterior
+CREATE OR ALTER FUNCTION IncrementoAnual (@AnhoFinal INT) RETURNS TABLE 
+AS RETURN(
+	SELECT A1.ProductID, CAST ((A2.[Cantidad vendida]-A1.[Cantidad vendida]) AS float)/A2.[Cantidad vendida] AS Diferencia FROM VentasAnuales(@AnhoFinal-1) AS A1
+		INNER JOIN VentasAnuales(@AnhoFinal) AS A2 ON A1.ProductID=A2.ProductID
+	)
+GO
+
+--Devuelve la modificacion del precio de un producto en un año concreto
+--PostCondicion: Si no se encuentra ese producto en ese año o no ha sufrido un incremento, la funion devuelve null
+CREATE OR ALTER FUNCTION CambioPrecio (@IdProducto INT, @Anho INT) RETURNS MONEY
+BEGIN
+	DECLARE @PrecioIncrementado MONEY 
+	DECLARE @Incremento FLOAT = NULL
+
+	SELECT @PrecioIncrementado=UnitPrice FROM Products WHERE ProductID=@IdProducto
+	SELECT @Incremento=Diferencia FROM IncrementoAnual(@Anho)
+
+		WHERE ProductID=@IdProducto
+
+	SET @PrecioIncrementado = CASE 
+		WHEN @Incremento<0 THEN @PrecioIncrementado*0.9
+		WHEN @Incremento BETWEEN 0.1 AND 0.5 THEN @PrecioIncrementado*1.05
+		WHEN @Incremento > 0.5 THEN
+			CASE 
+				WHEN @Incremento*0.1>2.25 THEN @PrecioIncrementado+2.25
+				ELSE @PrecioIncrementado*2.25
+			END
+		ELSE @PrecioIncrementado	--Caso en el que no se incrementa el case devolveria nulo
+	END
+	RETURN @PrecioIncrementado
+END
+
+
+GO
+
+--Actualizamos la tabla en los datos del 97
+UPDATE Products
+SET UnitPrice=ISNULL(dbo.CambioPrecio(ProductID,1997),UnitPrice)
+WHERE ProductID= 45756895
