@@ -10,9 +10,17 @@ GO
 
 CREATE OR ALTER PROCEDURE RecargaMinimaNecesaria
 AS BEGIN
-	
+	DECLARE @NumeroRecargas INT = 0
+	SELECT @NumeroRecargas = COUNT(*) FROM LM_Tarjetas AS T
+		LEFT JOIN (SELECT * FROM LM_Recargas 
+			WHERE DATEDIFF(DAY, Momento_Recarga, CURRENT_TIMESTAMP)>61) AS R ON T.ID=R.ID_Tarjeta
+		WHERE T.Saldo<0 --Corregir para caso generico
 END
 GO
+select * from LM_Recargas
+select * from LM_Tarjetas
+go
+insert select 
 --Ejercicio 1
 --Crea un procedimiento RecargarTarjeta que reciba como parámetros el ID de una tarjeta y un importe y actualice el saldo de la tarjeta sumándole 
 --dicho importe, además de grabar la correspondiente recarga
