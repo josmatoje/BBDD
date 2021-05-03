@@ -56,11 +56,65 @@ GO
 --y hará un update de las columnas que corresponda. Si no existe la entrada, grabaremos una nueva fila en LM_Viajes dejando a NULL la estación y el 
 --momento de entrada.
 --Si se omite el parámetro de la fecha/hora, se tomará la actual.
+
+ CREATE OR ALTER PROCEDURE PasajeroSale
+	@IdTarjeta INT,
+	@IdEstacionSalida SMALLINT,
+	@MomentoSalida SMALLDATETIME = NULL
+AS BEGIN
+	DECLARE @IdEstacionEntrada SMALLINT
+	DECLARE @ImporteViaje SMALLMONEY
+
+	--Asignamos la estación de entrada que se corresponda con la terjeta y que no tenga estacion de salida
+	SELECT @IdEstacionEntrada=IDEstacionEntrada FROM LM_Viajes WHERE IDTarjeta=@IdTarjeta AND IDEstacionSalida = NULL
+	--Selección del importe del viaje
+	SELECT @ImporteViaje = MAX(P.Precio_Zona) FROM LM_Zona_Precios AS P
+			INNER JOIN LM_Estaciones AS E ON P.Zona=E.Zona_Estacion
+			WHERE E.ID=@IdEstacionEntrada OR E.ID=@IdEstacionSalida
+	--Momento de salida en caso de no introducirse como parametro
+	IF (@MomentoSalida = NULL)
+	BEGIN
+		SET @MomentoSalida=CURRENT_TIMESTAMP
+	END
+	--Actualiza o inserta Viaje
+	IF(@IdEstacionEntrada != NULL)
+	BEGIN
+		UPDATE LM_Viajes 
+			SET IDEstacionSalida=@IdEstacionSalida,
+				MomentoSalida = @MomentoSalida,
+				Importe_Viaje=@ImporteViaje
+		WHERE IDTarjeta=@IdTarjeta AND IDEstacionSalida = NULL
+	END
+	ELSE
+	BEGIN
+		--El ID del viaje se autogenera, no es necesario insertarlo
+		INSERT INTO LM_Viajes (IDTarjeta, IDEstacionEntrada, IDEstacionSalida, MomentoEntrada, MomentoSalida, Importe_Viaje)
+			VALUES(@IdTarjeta, @IdEstacionEntrada, @IdEstacionSalida, NULL, @MomentoSalida, @ImporteViaje )
+	END
+END
 GO
+
 --Ejercicio 3
 --A veces, un pasajero reclama que le hemos cobrado un viaje de forma indebida. Escribe un procedimiento que reciba como parámetro el ID de un 
 --pasajero y la fecha y hora de la entrada en el metro y anule ese viaje, actualizando además el saldo de la tarjeta que utilizó.
+
+CREATE OR ALTER PROCEDURE AnularViaje
+	@IdPasajero INT,
+	@FechaHoraEntrada SMALLDATETIME
+AS BEGIN
+	DECLARE @IdTarjeta INT
+	DECLARE @Importe SMALLMONEY
+
+	SELECT @IdTarjeta=IDTarjeta, @Importe=Importe_Viaje FROM LM_Viajes AS V
+		INNER JOIN LM_Tarjetas AS T ON V.IDTarjeta=T.ID 
+		WHERE @IdPasajero=T.IDPasajero AND MomentoEntrada BETWEEN @FechaHoraEntrada AND DATEADD(HOUR, 1, @FechaHoraEntrada)--Fecha entre la dada y la siguiente hora
+	UPDATE LM_Tarjetas SET Saldo+=@Importe
+		WHERE ID=@IdTarjeta
+END
 GO
+SELECT * FROM LM_Pasajeros
+SELECT * FROM LM_Tarjetas
+
 --Ejercicio 4
 --La empresa de Metro realiza una campaña de promoción para pasajeros fieles.
 
