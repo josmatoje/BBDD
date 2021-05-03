@@ -10,17 +10,29 @@ GO
 
 CREATE OR ALTER PROCEDURE RecargaMinimaNecesaria
 AS BEGIN
-	DECLARE @NumeroRecargas INT = 0
-	SELECT @NumeroRecargas = COUNT(*) FROM LM_Tarjetas AS T
-		LEFT JOIN (SELECT * FROM LM_Recargas 
-			WHERE DATEDIFF(DAY, Momento_Recarga, CURRENT_TIMESTAMP)>61) AS R ON T.ID=R.ID_Tarjeta
-		WHERE T.Saldo<0 --Corregir para caso generico
+	--Variables
+	DECLARE @IdTarjeta INT = (SELECT TOP(1)ID FROM LM_Tarjetas ORDER BY ID)
+	DECLARE @Dineros SMALLMONEY
+
+	WHILE @IdTarjeta<(SELECT TOP(1)ID FROM LM_Tarjetas ORDER BY ID DESC)
+		BEGIN
+			SELECT @Dineros = Saldo FROM LM_Tarjetas WHERE ID=@IdTarjeta
+			IF(@Dineros < 0 AND DATEDIFF(DAY, (SELECT Momento_Recarga FROM LM_Recargas WHERE ID_Tarjeta=@IdTarjeta), CURRENT_TIMESTAMP)<61)--Aproximar fechas
+			BEGIN
+				SET @Dineros=ABS(@Dineros)
+				EXECUTE dbo.RecargarTarjeta @IdTarjeta, @Dineros
+			END
+			SET @IdTarjeta=(SELECT TOP(1)ID FROM LM_Tarjetas WHERE ID>@IdTarjeta)
+		END
 END
+
 GO
-select * from LM_Recargas
+begin tran
+EXECUTE dbo.RecargaMinimaNecesaria
 select * from LM_Tarjetas
-go
-insert select 
+rollback
+
+GO
 --Ejercicio 1
 --Crea un procedimiento RecargarTarjeta que reciba como parámetros el ID de una tarjeta y un importe y actualice el saldo de la tarjeta sumándole 
 --dicho importe, además de grabar la correspondiente recarga
@@ -34,7 +46,7 @@ AS BEGIN
 	SET Saldo+= @Importe WHERE ID=@IdTarjeta
 	--Insertamos la recarga correspondiente
 	INSERT INTO LM_Recargas (ID, ID_Tarjeta,Cantidad_Recarga,Momento_Recarga,SaldoResultante)
-	VALUES (NEWID(),@IdTarjeta, @Importe, CURRENT_TIMESTAMP, (SELECT Saldo+@Importe FROM LM_Tarjetas) )
+	VALUES (NEWID(),@IdTarjeta, @Importe, CURRENT_TIMESTAMP, (SELECT Saldo+@Importe FROM LM_Tarjetas WHERE @IdTarjeta=ID) )
 END
 GO
 --Ejercicio 2
