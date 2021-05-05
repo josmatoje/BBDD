@@ -66,18 +66,18 @@ AS BEGIN
 	DECLARE @ImporteViaje SMALLMONEY
 
 	--Asignamos la estación de entrada que se corresponda con la terjeta y que no tenga estacion de salida
-	SELECT @IdEstacionEntrada=IDEstacionEntrada FROM LM_Viajes WHERE IDTarjeta=@IdTarjeta AND IDEstacionSalida = NULL
+	SELECT @IdEstacionEntrada=IDEstacionEntrada FROM LM_Viajes WHERE IDTarjeta=@IdTarjeta AND IDEstacionSalida IS NULL
 	--Selección del importe del viaje
 	SELECT @ImporteViaje = MAX(P.Precio_Zona) FROM LM_Zona_Precios AS P
 			INNER JOIN LM_Estaciones AS E ON P.Zona=E.Zona_Estacion
 			WHERE E.ID=@IdEstacionEntrada OR E.ID=@IdEstacionSalida
 	--Momento de salida en caso de no introducirse como parametro
-	IF (@MomentoSalida = NULL)
+	IF (@MomentoSalida = NULL)--ISNULL
 	BEGIN
 		SET @MomentoSalida=CURRENT_TIMESTAMP
 	END
 	--Actualiza o inserta Viaje
-	IF(@IdEstacionEntrada != NULL)
+	IF(@IdEstacionEntrada IS NOT NULL)
 	BEGIN
 		UPDATE LM_Viajes 
 			SET IDEstacionSalida=@IdEstacionSalida,
@@ -132,6 +132,24 @@ GO
 
 --Primera aproximación: Se considera que un pasajero ha podido subir a un tren si ese tren se encontraba en serviciodurante el tiempo que el 
 --pasajero ha permanecido dentro del sistema de metro
+
+CREATE OR ALTER FUNCTION PuedoSubir (@IdViaje Int, @Matricula Char(7)) RETURNS Bit 
+AS
+BEGIN
+	DECLARE @Posible Bit = 0
+	DECLARE @MomentoEntrada Smalldatetime
+	DECLARE @MomentoSalida Smalldatetime
+	--Asignamos los momentos de entrada y salida del viaje
+	SELECT @MomentoEntrada=MomentoEntrada, @MomentoSalida=MomentoSalida FROM LM_Viajes WHERE ID=@IdViaje
+
+	IF (EXISTS (SELECT * FROM LM_Trenes AS T
+			INNER JOIN LM_Recorridos AS R ON T.ID=R.Tren
+			WHERE R.Momento BETWEEN @MomentoEntrada and @MomentoSalida) and --matricula)
+	BEGIN
+		SET @Posible=1
+	END
+	RETURN @Posible
+END
 GO
 --Ejercicio 6
 --Crea un procedimiento SustituirTarjeta que Cree una nueva tarjeta y la asigne al mismo usuario y con el mismo saldo que otra tarjeta existente. 
