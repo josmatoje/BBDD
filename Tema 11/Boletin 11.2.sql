@@ -144,7 +144,7 @@ BEGIN
 
 	IF (EXISTS (SELECT * FROM LM_Trenes AS T
 			INNER JOIN LM_Recorridos AS R ON T.ID=R.Tren
-			WHERE R.Momento BETWEEN @MomentoEntrada and @MomentoSalida) and --matricula)
+			WHERE R.Momento BETWEEN @MomentoEntrada AND @MomentoSalida AND T.Matricula=@Matricula))
 	BEGIN
 		SET @Posible=1
 	END
