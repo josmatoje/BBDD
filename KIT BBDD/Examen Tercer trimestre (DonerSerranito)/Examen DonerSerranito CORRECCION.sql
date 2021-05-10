@@ -201,7 +201,7 @@ CREATE OR ALTER FUNCTION EstudiosAdicionales (@IdEstablecimiento int)
 	RETURNS @Estudio TABLE (
 			[Nombre Adicional] VarChar (20) NOT NULL,
 			[Número de serranitos] int NULL,
-			[Porcentaje de serranitos %] int NULL,
+			[Porcentaje de serranitos %] decimal(4,2) NULL,
 			[Precio medio de pedidos con ese adicional] smallmoney NULL
 			)AS
 	BEGIN
@@ -209,79 +209,36 @@ CREATE OR ALTER FUNCTION EstudiosAdicionales (@IdEstablecimiento int)
 		SELECT Adicional FROM DSAdicionales
 
 		UPDATE @Estudio
-		SET [Número de serranitos] = 
-				 (SELECT COUNT (PL.ID) FROM DSAdicionales AS A
+		SET [Número de serranitos] =  COUNT (PL.ID),
+			[Precio medio de pedidos con ese adicional] = AVG (PD.Importe) FROM DSAdicionales AS A
 				INNER JOIN DSPlatosAdicionales AS PA ON A.ID=PA.IDAdicional
 				INNER JOIN DSPlatos AS PL ON PA.IDPlato=PL.ID
 				INNER JOIN DSPedidos AS PD ON PL.IDPedido=PD.ID
 				WHERE PD.IDEstablecimiento=@IdEstablecimiento AND
-						A.Adicional=[Nombre Adicional])
+						A.Adicional=[Nombre Adicional]
 		UPDATE @Estudio
 		SET [Porcentaje de serranitos %] = 
-				(SELECT [Número de serranitos]*100/COUNT (PL.ID) FROM DSAdicionales AS A
+				(SELECT CAST([Número de serranitos] AS decimal)*100/COUNT (PL.ID) FROM DSAdicionales AS A
 				INNER JOIN DSPlatosAdicionales AS PA ON A.ID=PA.IDAdicional
 				INNER JOIN DSPlatos AS PL ON PA.IDPlato=PL.ID
 				INNER JOIN DSPedidos AS PD ON PL.IDPedido=PD.ID
 				WHERE PD.IDEstablecimiento=@IdEstablecimiento)
-		UPDATE @Estudio
-		SET [Precio medio de pedidos con ese adicional] = 
-				(SELECT AVG (PD.Importe) FROM DSPedidos AS PD
-				INNER JOIN DSPlatos AS PL ON PD.ID=PL.IDPedido
-				INNER JOIN DSPlatosAdicionales AS PA ON PL.ID=PA.IDPlato
-				INNER JOIN DSAdicionales AS A ON PA.IDAdicional=A.ID
-				WHERE IDEstablecimiento=@IdEstablecimiento AND 
-						A.Adicional = [Nombre Adicional])
+		--UPDATE @Estudio
+		--SET [Precio medio de pedidos con ese adicional] = 
+		--		(SELECT AVG (PD.Importe) FROM DSPedidos AS PD
+		--		INNER JOIN DSPlatos AS PL ON PD.ID=PL.IDPedido
+		--		INNER JOIN DSPlatosAdicionales AS PA ON PL.ID=PA.IDPlato
+		--		INNER JOIN DSAdicionales AS A ON PA.IDAdicional=A.ID
+		--		WHERE IDEstablecimiento=@IdEstablecimiento AND 
+		--				A.Adicional = [Nombre Adicional])
 
 	RETURN
 	END
-GO
---Nombre: EstudiosAdicionales
---Descripción: Nos devuelve una tabla con los adicionales, y un estudio de la cantidad, el porcentaje y el precio medio del pedido de el local dado.
---Entrada: Id establecimiento
---Salida: Tabla (Nombre adicional, número de serranitos, porcentaje de serranitos, precio medio de pedidos con ese adicional)
 
-CREATE OR ALTER FUNCTION EstudiosAdicionales (@IdEstablecimiento int)
-	RETURNS @Estudio TABLE (
-			[Nombre Adicional] VarChar (20) NOT NULL,
-			[Número de serranitos] int NULL,
-			[Porcentaje de serranitos %] int NULL,
-			[Precio medio de pedidos con ese adicional] smallmoney NULL
-			)AS
-	BEGIN
-		DECLARE @
-
-		INSERT INTO @Estudio ([Nombre Adicional])
-		SELECT Adicional FROM DSAdicionales
-
-		UPDATE @Estudio
-		SET [Número de serranitos] = 
-				 (SELECT COUNT (PL.ID) FROM DSAdicionales AS A
-				INNER JOIN DSPlatosAdicionales AS PA ON A.ID=PA.IDAdicional
-				INNER JOIN DSPlatos AS PL ON PA.IDPlato=PL.ID
-				INNER JOIN DSPedidos AS PD ON PL.IDPedido=PD.ID
-				WHERE PD.IDEstablecimiento=@IdEstablecimiento AND
-						A.Adicional=[Nombre Adicional])
-		UPDATE @Estudio
-		SET [Porcentaje de serranitos %] = 
-				(SELECT [Número de serranitos]*100/COUNT (PL.ID) FROM DSAdicionales AS A
-				INNER JOIN DSPlatosAdicionales AS PA ON A.ID=PA.IDAdicional
-				INNER JOIN DSPlatos AS PL ON PA.IDPlato=PL.ID
-				INNER JOIN DSPedidos AS PD ON PL.IDPedido=PD.ID
-				WHERE PD.IDEstablecimiento=@IdEstablecimiento)
-		UPDATE @Estudio
-		SET [Precio medio de pedidos con ese adicional] = 
-				(SELECT AVG (PD.Importe) FROM DSPedidos AS PD
-				INNER JOIN DSPlatos AS PL ON PD.ID=PL.IDPedido
-				INNER JOIN DSPlatosAdicionales AS PA ON PL.ID=PA.IDPlato
-				INNER JOIN DSAdicionales AS A ON PA.IDAdicional=A.ID
-				WHERE IDEstablecimiento=@IdEstablecimiento AND 
-						A.Adicional = [Nombre Adicional])
-
-	RETURN
-	END
 GO
 
 --PRUEBA
-SELECT * FROM DBO.EstudiosAdicionales(1)
+--SELECT SUM(A.[Porcentaje de serranitos %]) FROM (
+SELECT * FROM DBO.EstudiosAdicionales(1)--) AS A
 
 

@@ -31,6 +31,8 @@ GO
 CREATE OR ALTER FUNCTION Nombredelafuncion (@variable1 int, @v2 char) RETURNS TABLE AS
 RETURN(SELECT * FROM )
 
+
+GO
 --PRUEBA
 SELECT * FROM dbo.Nombredelafuncion()
 
@@ -56,6 +58,8 @@ BEGIN
 RETURN
 END
 
+GO
+
 --PRUEBA
 SELECT * FROM dbo.Nombredelafuncion()
 
@@ -68,20 +72,23 @@ GO
 --Entradas:
 --Salidas:
 
-CREATE OR ALTER PROCEDURE Nombredelafuncion 
+CREATE OR ALTER PROCEDURE NombredelProcedimiento 
 		@variable1 int,
 		@v2 char,
 		@SALIDA int OUTPUT AS
 BEGIN
-	SET @SALIDA int
+	SET @SALIDA 
 
 
 END
 
+GO
+
+
 --PRUEBA
 BEGIN TRANSACTION
 DECLARE @NUMERO int
-EXECUTE InscribeCaballo 1,9, @NUMERO OUTPUT
+EXECUTE NombredelProcedimiento 1,9, @NUMERO OUTPUT
 print @NUMERO
 rollback
 
