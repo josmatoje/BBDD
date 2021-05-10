@@ -26,7 +26,7 @@ BEGIN
 	DECLARE @CantidadSerranito Int
 	SELECT @CantidadSerranito = COUNT(PL.ID) FROM DSEstablecimientos AS E
 			INNER JOIN DSPedidos AS PE ON E.ID=PE.IDEstablecimiento
-			INNER JOIN DSPlatos AS PL ON PE.ID=PL.IDPedido
+			INNER JOIN DSPlatos AS PL ON PL.ID=PL.IDPedido
 			INNER JOIN DSPlatosSalsas AS PS ON PE.ID=PS.IDPlato
 			WHERE	E.Denominacion=@Establecimiento AND
 					PE.Enviado BETWEEN @FechaInicio AND @FechaFin AND
@@ -47,8 +47,16 @@ GO
 --Queremos saber cuál es la salsa que prefieren los clientes de un establecimiento para acompañar cada tipo de carne. Escribe una función a la que 
 --pasemos el nombre de un establecimiento y nos devuelva una tabla con los distintos tipos de carne y la salsa que más veces la acompaña, así como el
 --número total de serranitos vendidos que incluyan ese tipo de carne y esa salsa. Utiliza la función desarrollada en el ejercicio 1
-
+SELECT * FROM DSEstablecimientos AS E
+			INNER JOIN DSPedidos AS PE ON E.ID=PE.IDEstablecimiento
+			INNER JOIN DSPlatos AS PL ON PE.ID=PL.IDPedido
+			INNER JOIN DSPlatosSalsas AS PS ON PL.ID=PS.IDPlato
+			WHERE	E.Denominacion='La Fragua' AND
+			
+					PS.IDSalsa = 6 AND
+					PL.TipoCarne = 'Caballo'
 GO
+select * from DSTiposSalsa
 --Nombre: MejorSalsa
 --Descripción: Nos devuelve la salsa que más veces acompaña a cada tipo de carne y el numero de serranitos con esta combinación 
 --				en un establecimiento dado.
@@ -78,6 +86,7 @@ CREATE OR ALTER FUNCTION MejorSalsa (@Establecimiento varchar(30))
 		RETURN
 	END
 GO
+
 
 --Dada la función NumeroSerranitosTipo, tenemos todos los parametros de la funcion salvo la salsa. Para valorar todas las salsas cogemos los valores
 --de la tabla TipoSalsa.
@@ -214,8 +223,8 @@ CREATE OR ALTER FUNCTION EstudiosAdicionales (@IdEstablecimiento int)
 				INNER JOIN DSPlatosAdicionales AS PA ON A.ID=PA.IDAdicional
 				INNER JOIN DSPlatos AS PL ON PA.IDPlato=PL.ID
 				INNER JOIN DSPedidos AS PD ON PL.IDPedido=PD.ID
-				WHERE PD.IDEstablecimiento=@IdEstablecimiento AND
-						A.Adicional=[Nombre Adicional]
+			WHERE PD.IDEstablecimiento=@IdEstablecimiento AND
+					A.Adicional=[Nombre Adicional]
 		UPDATE @Estudio
 		SET [Porcentaje de serranitos %] = 
 				(SELECT CAST([Número de serranitos] AS decimal)*100/COUNT (PL.ID) FROM DSAdicionales AS A
