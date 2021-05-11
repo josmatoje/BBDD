@@ -15,6 +15,7 @@ BEGIN
 	RETURN @devolucion
 END
 
+GO
 --PRUEBA
 SELECT dbo.Nombredelafuncion()
 
